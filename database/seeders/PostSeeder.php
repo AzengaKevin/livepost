@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Database\Seeders\Traits\TruncateTable;
 use Database\Seeders\Traits\ToggleForeignKeyChecks;
@@ -21,7 +22,12 @@ class PostSeeder extends Seeder
 
         $this->truncate("posts");
 
-        Post::factory(10)->randomUser()->create();
+        $posts = Post::factory(10)->randomUser()->create();
+
+        $posts->each(
+            fn(Post $post) => 
+            $post->users()->syncWithoutDetaching(User::inRandomOrder()->first())
+        );
         
         $this->enableForeignKeyChecks();
     }

@@ -25,7 +25,7 @@ class PostFactory extends Factory
 
     public function randomUser()
     {
-        $usersIds = User::all()->pluck('id')->all();
+        $usersIds = User::query()->get('id')->pluck('id')->all();
         
         return $this->state([
             'user_id' => fake()->randomElement($usersIds)

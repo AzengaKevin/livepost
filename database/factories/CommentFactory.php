@@ -25,7 +25,7 @@ class CommentFactory extends Factory
 
     public function randomUser()
     {
-        $usersIds = User::all()->pluck('id')->all();
+        $usersIds = User::query()->get(['id'])->pluck('id')->all();
         
         return $this->state([
             'user_id' => fake()->randomElement($usersIds)
@@ -34,7 +34,7 @@ class CommentFactory extends Factory
 
     public function randomPost()
     {
-        $postsIds = Post::all()->pluck('id')->all();
+        $postsIds = Post::query()->get(['id'])->pluck('id')->all();
         
         return $this->state([
             'post_id' => fake()->randomElement($postsIds)
