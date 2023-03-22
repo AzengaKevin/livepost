@@ -3,7 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\PostController;
 
-Route::as('posts.')
+Route::middleware('auth:sanctum')
+    ->as('posts.')
     ->group(function () {
 
         Route::get('/posts', [PostController::class, 'index'])
@@ -11,8 +12,7 @@ Route::as('posts.')
             ->withoutMiddleware('auth:sanctum');
 
         Route::post('/posts', [PostController::class, 'store'])
-            ->name('store')
-            ->withoutMiddleware('auth:sanctum');
+            ->name('store');
 
         Route::get('/posts/{post}', [PostController::class, 'show'])
             ->whereNumber(['post'])
