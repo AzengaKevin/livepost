@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\Comment;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class CommentController extends Controller
 {
@@ -13,7 +14,9 @@ class CommentController extends Controller
      */
     public function index()
     {
-        //
+        $comments = Comment::query()->get();
+
+        return response()->json(['data' => $comments]);
     }
 
     /**
@@ -21,7 +24,17 @@ class CommentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'post_id' => ['required', 'integer'],
+            'body' => ['required', 'string']
+        ]);
+
+        /** @var User */
+        $currentUser = $request->user();
+
+        $newComment = $currentUser->comments()->create($data);
+
+        return response()->json(['data' => $newComment], 203);
     }
 
     /**
@@ -29,7 +42,7 @@ class CommentController extends Controller
      */
     public function show(Comment $comment)
     {
-        //
+        return response()->json(['data' => $comment]);
     }
 
     /**
@@ -37,7 +50,17 @@ class CommentController extends Controller
      */
     public function update(Request $request, Comment $comment)
     {
-        //
+        $data = $request->validate([
+            'post_id' => ['nullable', 'integer'],
+            'body' => ['nullable', 'string']
+        ]);
+
+        $comment->update([
+            'post_id' => $data['post_id'] ?? $comment->post_id,
+            'body' => $data['body'] ?? $comment->body,
+        ]);
+
+        return response()->json(['data' => $comment->fresh()]);
     }
 
     /**
@@ -45,6 +68,8 @@ class CommentController extends Controller
      */
     public function destroy(Comment $comment)
     {
-        //
+        $comment->delete();
+
+        return response()->noContent();
     }
 }

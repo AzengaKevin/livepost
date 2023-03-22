@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class PostController extends Controller
 {
@@ -13,7 +13,11 @@ class PostController extends Controller
      */
     public function index()
     {
-        //
+        $posts = Post::query()->get();
+
+        return response()->json([
+            'data' => $posts
+        ], 200); 
     }
 
     /**
@@ -21,7 +25,16 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'body' => ['required'],
+        ]);
+
+        $newPost = Post::query()->create($data);
+
+        return response()->json([
+            'data' => $newPost
+        ], 203);
     }
 
     /**
@@ -29,7 +42,9 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        //
+        return response()->json([
+            'data' => $post
+        ], 200);
     }
 
     /**
@@ -37,7 +52,19 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
-        //
+        $data = $request->validate([
+            'title' => ['nullable', 'string', 'max:255'],
+            'body' => ['nullable'],
+        ]);
+
+        $post->update([
+            'title' => $data['title'] ?? $post['title'],
+            'body' => $data['body'] ?? $post['body'],
+        ]);
+
+        return response()->json([
+            'data' => $post->fresh()
+        ]);
     }
 
     /**
@@ -45,6 +72,9 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        //
+        $post->delete();
+
+        return response()->noContent();
+        
     }
 }

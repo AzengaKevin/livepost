@@ -13,7 +13,9 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        $users = User::query()->get();
+
+        return response()->json(['data' => $users], 200);
     }
 
     /**
@@ -21,7 +23,15 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255'],
+            'password' => ['required', 'min:8', 'max:32'],
+        ]);
+
+        $newUser = User::query()->create($data);
+
+        return response()->json(['data' => $newUser], 203);
     }
 
     /**
@@ -29,7 +39,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        //
+        return response()->json(['data' => $user]);
     }
 
     /**
@@ -37,7 +47,19 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        //
+        $data = $request->validate([
+            'name' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'string', 'email', 'max:255'],
+            'password' => ['nullable', 'min:8', 'max:32'],
+        ]);
+
+        $user->update([
+            'name' => $data['name'] ?? $user->name,
+            'email' => $data['email'] ?? $user->email,
+            'password' => $data['password'] ?? $user->password,
+        ]);
+
+        return response()->json(['data' => $user->fresh()]);
     }
 
     /**
@@ -45,6 +67,8 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        //
+        $user->delete();
+
+        return response()->noContent();
     }
 }
