@@ -4,8 +4,9 @@ namespace App\Repositories;
 
 use App\Models\Post;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
 
-class PostRepository
+class PostRepository extends BaseRepository
 {
     public function create(array $attributes)
     {
@@ -25,7 +26,7 @@ class PostRepository
         });
     }
 
-    public function update(Post $post, array $attributes)
+    public function update(Model $post, array $attributes)
     {
         DB::transaction(function() use($post, $attributes){
 
@@ -41,7 +42,7 @@ class PostRepository
         });
     }
 
-    public function delete(Post $post)
+    public function delete(Model $post)
     {
         DB::transaction(function() use($post){
 
