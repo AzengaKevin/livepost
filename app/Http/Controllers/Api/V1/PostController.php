@@ -7,10 +7,15 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PostResource;
+use App\Repositories\PostRepository;
 use App\Providers\PaginationServiceProvider;
 
 class PostController extends Controller
 {
+
+    public function __construct(private PostRepository $postRepository) {
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -34,7 +39,10 @@ class PostController extends Controller
         /** @var User */
         $currentUser = $request->user();
 
-        $newPost = $currentUser->posts()->create($data);
+        $newPost = $this->postRepository->create([
+            ...$data,
+            'user_id' => $currentUser->id
+        ]);
 
         return new PostResource($newPost);
     }
@@ -62,6 +70,14 @@ class PostController extends Controller
             'body' => $data['body'] ?? $post['body'],
         ]);
 
+        /** @var User */
+        $currentUser = $request->user();
+
+        $this->postRepository->update($post, [
+            ...$data,
+            'user_id' => $currentUser->id
+        ]);
+
         return new PostResource($post->fresh());
     }
 
@@ -70,7 +86,7 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        $post->delete();
+        $this->postRepository->delete($post);
 
         return response()->noContent();
         

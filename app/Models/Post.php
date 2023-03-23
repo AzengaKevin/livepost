@@ -27,16 +27,33 @@ class Post extends Model
         'uppercase_title'
     ];
 
+    /**
+     * Post uppercase title accessor
+     */
     public function uppercaseTitle(): Attribute
     {
         return Attribute::get(fn ($value, $attributes) => str()->upper($attributes['title']));
     }
 
+    /**
+     * Post - Comment relationship (1:M)
+     */
     public function comments()
     {
         return $this->hasMany(Comment::class);
     }
 
+    /**
+     * Post - User relationship (M:1)
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Post - User relationship (M:N)
+     */
     public function users()
     {
         return $this->belongsToMany(User::class);
