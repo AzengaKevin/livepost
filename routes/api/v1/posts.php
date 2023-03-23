@@ -16,7 +16,8 @@ Route::middleware('auth:sanctum')
 
         Route::get('/posts/{post}', [PostController::class, 'show'])
             ->whereNumber(['post'])
-            ->name('show');
+            ->name('show')
+            ->withoutMiddleware('auth:sanctum');
 
         Route::patch('/posts/{post}', [PostController::class, 'update'])
             ->whereNumber(['post'])

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\PostResource;
 
 class PostController extends Controller
 {
@@ -15,9 +17,7 @@ class PostController extends Controller
     {
         $posts = Post::query()->get();
 
-        return response()->json([
-            'data' => $posts
-        ], 200); 
+        return PostResource::collection($posts);
     }
 
     /**
@@ -30,11 +30,12 @@ class PostController extends Controller
             'body' => ['required'],
         ]);
 
-        $newPost = Post::query()->create($data);
+        /** @var User */
+        $currentUser = $request->user();
 
-        return response()->json([
-            'data' => $newPost
-        ], 203);
+        $newPost = $currentUser->posts()->create($data);
+
+        return new PostResource($newPost);
     }
 
     /**
@@ -42,9 +43,7 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        return response()->json([
-            'data' => $post
-        ], 200);
+        return new PostResource($post);
     }
 
     /**
@@ -62,9 +61,7 @@ class PostController extends Controller
             'body' => $data['body'] ?? $post['body'],
         ]);
 
-        return response()->json([
-            'data' => $post->fresh()
-        ]);
+        return new PostResource($post->fresh());
     }
 
     /**
