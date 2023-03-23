@@ -7,6 +7,7 @@ use App\Models\Comment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CommentResource;
+use App\Providers\PaginationServiceProvider;
 
 class CommentController extends Controller
 {
@@ -15,7 +16,7 @@ class CommentController extends Controller
      */
     public function index()
     {
-        $comments = Comment::query()->get();
+        $comments = Comment::query()->paginate(perPage: PaginationServiceProvider::PER_PAGE);
 
         return CommentResource::collection($comments);
     }

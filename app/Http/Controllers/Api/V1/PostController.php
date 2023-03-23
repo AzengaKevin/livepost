@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PostResource;
+use App\Providers\PaginationServiceProvider;
 
 class PostController extends Controller
 {
@@ -15,7 +16,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::query()->get();
+        $posts = Post::query()->paginate(perPage: PaginationServiceProvider::PER_PAGE);
 
         return PostResource::collection($posts);
     }

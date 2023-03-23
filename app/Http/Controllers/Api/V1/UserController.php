@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
+use App\Providers\PaginationServiceProvider;
 
 class UserController extends Controller
 {
@@ -14,7 +15,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::query()->get();
+        $users = User::query()->paginate(perPage: PaginationServiceProvider::PER_PAGE);
 
         return UserResource::collection($users);
     }
