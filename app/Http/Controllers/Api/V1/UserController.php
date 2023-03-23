@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 
 class UserController extends Controller
 {
@@ -15,7 +16,7 @@ class UserController extends Controller
     {
         $users = User::query()->get();
 
-        return response()->json(['data' => $users], 200);
+        return UserResource::collection($users);
     }
 
     /**
@@ -31,7 +32,7 @@ class UserController extends Controller
 
         $newUser = User::query()->create($data);
 
-        return response()->json(['data' => $newUser], 203);
+        return new UserResource($newUser);
     }
 
     /**
@@ -39,7 +40,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        return response()->json(['data' => $user]);
+        return new UserResource($user);
     }
 
     /**
@@ -59,7 +60,7 @@ class UserController extends Controller
             'password' => $data['password'] ?? $user->password,
         ]);
 
-        return response()->json(['data' => $user->fresh()]);
+        return new UserResource($user->fresh());
     }
 
     /**
