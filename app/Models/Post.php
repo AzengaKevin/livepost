@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Post extends Model
 {
@@ -12,7 +14,8 @@ class Post extends Model
 
     protected $fillable = [
         'title',
-        'body'
+        'body',
+        'user_id'
     ];
 
     protected $casts = [
@@ -46,7 +49,7 @@ class Post extends Model
     /**
      * Post - User relationship (M:1)
      */
-    public function user()
+    public function user() : BelongsTo
     {
         return $this->belongsTo(User::class);
     }
@@ -54,7 +57,7 @@ class Post extends Model
     /**
      * Post - User relationship (M:N)
      */
-    public function users()
+    public function users() : BelongsToMany
     {
         return $this->belongsToMany(User::class);
     }

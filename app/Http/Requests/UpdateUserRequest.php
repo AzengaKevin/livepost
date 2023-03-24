@@ -2,9 +2,10 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateCommentRequest extends FormRequest
+class UpdateUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,8 +22,12 @@ class UpdateCommentRequest extends FormRequest
      */
     public function rules(): array
     {
+        $user = request()->route('user');
+
         return [
-            'body' => ['required', 'string']
+            'name' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('users')->ignore(optional($user)->id)],
+            'password' => ['nullable', 'min:8', 'max:32'],
         ];
     }
 }

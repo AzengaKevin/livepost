@@ -2,24 +2,30 @@
 
 namespace App\Repositories;
 
+use Exception;
 use App\Models\Post;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 
 class PostRepository extends BaseRepository
 {
+    public function __construct(private PostUserRepository $postUserRepository) {
+    }
+    
     public function create(array $attributes)
     {
         return DB::transaction(function() use ($attributes){
 
             /** @var Post */
-            $newPost = Post::query()->create([
-                'title' => data_get($attributes, 'title', null),
-                'body' => data_get($attributes, 'body', null),
-                'user_id' => data_get($attributes, 'user_id', null),
-            ]);
+            $newPost = Post::query()->create($attributes);
 
-            $newPost->users()->attach($newPost->user);
+            if($newPost && $newPost->user){
+
+                $result = $this->postUserRepository->attachUserToPost($newPost, $newPost->user);
+
+                throw_unless(in_array($newPost->user->id, $result['attached']), Exception::class, "Failed to attach user to own post");
+                
+            }
 
             return $newPost;
 
@@ -28,25 +34,28 @@ class PostRepository extends BaseRepository
 
     public function update(Model $post, array $attributes)
     {
-        DB::transaction(function() use($post, $attributes){
+        return DB::transaction(function() use($post, $attributes){
 
-            $post->update([
+            $result = $post->update([
                 'title' => data_get($attributes, 'title', $post->title),
                 'body' => data_get($attributes, 'body', $post->body)
             ]);
-    
-            if($userId = data_get($attributes, 'user_id', null)){
 
-                $post->users()->syncWithoutDetaching($userId);
-            }
+            throw_if(! $result, Exception::class, "Could not updated the post");
+
+            return $result;
         });
     }
 
     public function delete(Model $post)
     {
-        DB::transaction(function() use($post){
+        return DB::transaction(function() use($post){
 
-            $post->delete();
+            $result = $post->delete();
+
+            throw_if(!$result, Exception::class, "Could not create the delete");
+
+            return $result;
 
         });
     }
