@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Throwable;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -43,6 +44,22 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+
+
+        $this->renderable(function (Throwable $e, $request) {
+
+            if($e instanceof NotFoundHttpException){
+
+                if ($request->expectsJson()) {
+
+                    $message = $e->getMessage();
+
+                    return response()->json(compact('message'), 404);
+
+                }
+            }
         });
     }
 }

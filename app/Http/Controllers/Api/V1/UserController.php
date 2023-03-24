@@ -3,14 +3,20 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Models\User;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreUserRequest;
 use App\Http\Resources\UserResource;
+use App\Repositories\UserRepository;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Providers\PaginationServiceProvider;
 
 class UserController extends Controller
 {
+
+    public function __construct(private UserRepository $userRepository)
+    {
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -28,7 +34,7 @@ class UserController extends Controller
     {
         $data = $storeUserRequest->validated();
 
-        $newUser = User::query()->create($data);
+        $newUser = $this->userRepository->create($data);
 
         return new UserResource($newUser);
     }
@@ -44,19 +50,9 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(UpdateUserRequest $updateUserRequest, User $user)
     {
-        $data = $request->validate([
-            'name' => ['nullable', 'string', 'max:255'],
-            'email' => ['nullable', 'string', 'email', 'max:255'],
-            'password' => ['nullable', 'min:8', 'max:32'],
-        ]);
-
-        $user->update([
-            'name' => $data['name'] ?? $user->name,
-            'email' => $data['email'] ?? $user->email,
-            'password' => $data['password'] ?? $user->password,
-        ]);
+        $this->userRepository->update($user, $updateUserRequest->validated());
 
         return new UserResource($user->fresh());
     }
@@ -66,7 +62,7 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        $user->delete();
+        $this->userRepository->delete($user);
 
         return response()->noContent();
     }
