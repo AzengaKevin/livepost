@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Models\User;
 use App\Models\Comment;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CommentResource;
+use App\Repositories\CommentRepository;
+use App\Http\Requests\UpdateCommentRequest;
 use App\Providers\PaginationServiceProvider;
 
 class CommentController extends Controller
 {
+
+    public function __construct(private CommentRepository $commentRepository) {
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -19,24 +23,6 @@ class CommentController extends Controller
         $comments = Comment::query()->paginate(perPage: PaginationServiceProvider::PER_PAGE);
 
         return CommentResource::collection($comments);
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'post_id' => ['required', 'integer'],
-            'body' => ['required', 'string']
-        ]);
-
-        /** @var User */
-        $currentUser = $request->user();
-
-        $newComment = $currentUser->comments()->create($data);
-
-        return new CommentResource($newComment);
     }
 
     /**
@@ -50,17 +36,11 @@ class CommentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Comment $comment)
+    public function update(UpdateCommentRequest $updateCommentRequest, Comment $comment)
     {
-        $data = $request->validate([
-            'post_id' => ['nullable', 'integer'],
-            'body' => ['nullable', 'string']
-        ]);
+        $data = $updateCommentRequest->validated();
 
-        $comment->update([
-            'post_id' => $data['post_id'] ?? $comment->post_id,
-            'body' => $data['body'] ?? $comment->body,
-        ]);
+        $this->commentRepository->update($comment, $data);
 
         return new CommentResource($comment->fresh());
     }
@@ -70,7 +50,8 @@ class CommentController extends Controller
      */
     public function destroy(Comment $comment)
     {
-        $comment->delete();
+
+        $this->commentRepository->delete($comment);
 
         return response()->noContent();
     }
