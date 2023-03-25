@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Post;
 use App\Models\User;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PostResource;
 use App\Repositories\PostRepository;
+use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
 use App\Providers\PaginationServiceProvider;
 
 class PostController extends Controller
@@ -29,15 +30,12 @@ class PostController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StorePostRequest $storePostRequest)
     {
-        $data = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'body' => ['required'],
-        ]);
+        $data = $storePostRequest->validated();
 
         /** @var User */
-        $currentUser = $request->user();
+        $currentUser = $storePostRequest->user();
 
         $newPost = $this->postRepository->create([
             ...$data,
@@ -58,20 +56,12 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Post $post)
+    public function update(UpdatePostRequest $updatePostRequest, Post $post)
     {
-        $data = $request->validate([
-            'title' => ['nullable', 'string', 'max:255'],
-            'body' => ['nullable'],
-        ]);
-
-        $post->update([
-            'title' => $data['title'] ?? $post['title'],
-            'body' => $data['body'] ?? $post['body'],
-        ]);
+        $data = $updatePostRequest->validated();
 
         /** @var User */
-        $currentUser = $request->user();
+        $currentUser = $updatePostRequest->user();
 
         $this->postRepository->update($post, [
             ...$data,
