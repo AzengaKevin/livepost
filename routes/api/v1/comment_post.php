@@ -7,5 +7,5 @@ Route::middleware('auth:sanctum')
     ->as('posts.comments.')
     ->group(function () {
         Route::post('/posts/{post}/comments', [PostCommentController::class, 'store'])
-            ->name('index');
+            ->name('store');
     });
